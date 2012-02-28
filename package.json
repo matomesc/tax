@@ -2,6 +2,8 @@
   "author": "Mihai Tomescu <matomesc@gmail.com>",
   "name": "tax",
   "description": "simple node.js build tool",
+  "keywords": ["build", "tool", "make", "jake"],
+  "homepage": "https://github.com/matomesc/tax",
   "version": "0.0.1",
   "repository": {
     "type": "git",
