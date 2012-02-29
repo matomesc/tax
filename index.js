@@ -8,15 +8,27 @@ var cp = require('child_process')
   , EventEmitter = require('events').EventEmitter
   , fs = require('fs')
   , util = require('util')
+  , colors = require('colors')
   , Seq = require('seq')
   , findit = require('findit');
 
 // might change
 var API = ['cp', 'mkdir', 'mv', 'rm', 'lessc', 'hint', 'test'];
 
+var version = exports.version = require('./package.json').version;
+
+//
+// public constructors
+//
+
 exports.Task = Task;
 exports.Runner = Runner;
 exports.Subtask = Subtask;
+exports.Cli = Cli;
+
+//
+// Task
+//
 
 function Task(name, description) {
   this.name = name;
@@ -45,7 +57,7 @@ merge(Task.prototype, buildProto(), {
       })
       .catch(function (err) {
         throw err;
-      });
+      })
       .seq(function () {
         console.log('%s - ' + 'finished'.bold);
       });
@@ -76,7 +88,7 @@ function buildProto() {
         } else if (typeof fn === 'function' && fn.length > 0) {
           // fn is an asynch function, pass done as a cb, then exec the result
           function done(err, result) {
-            if (Array.isArray(result) {
+            if (Array.isArray(result)) {
               result = [].concat.call([name], result);
             }
             cp.exec(result.join(' '), cb);
@@ -93,14 +105,65 @@ function buildProto() {
       this.addSubtask(wrapper, true);
     };
   });
+  return proto;
 }
+
+//
+// Subtask
+//
 
 function Subtask(fn, async) {
   this.async = async;
   this.fn = fn;
 }
 
+//
+// Runner
+//
+
 function Runner() {}
+
+//
+// cli
+//
+
+function Cli(cwd) {
+  this.version = version;
+  this.searchedDirs = [];
+  this.cwd = cwd || process.cwd();
+  var path = this.findFile();
+  if (!path) {
+    this.fail([
+      "tax@%s - can't find tax.js"
+    , "looked in the following directories:\n%s"].join('\n')
+    , this.version
+    , this.searchedDirs.join('\n'));
+  }
+}
+
+Cli.prototype = {
+  start: function () {
+    var path = findFile();
+  },
+  findFile: function () {
+
+  },
+  getTasks: function () {
+
+  },
+  updateCwd: function (dir) {
+    try {
+      process.chdir(dir);
+      this.cwd = dir;
+    } catch (e) {
+      this.fail("can't update cwd to %s".red, dir)
+    }
+  },
+  fail: function () {
+    console.log.apply(null, Array.prototype.slice.call(arguments));
+    process.exit(1);
+  }
+}
 
 //
 // utils
