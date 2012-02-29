@@ -11,7 +11,7 @@
   },
   "main": "./index.js",
   "scripts": {
-    "test": "./mocha -R spec"
+    "test": "./node_modules/mocha/bin/mocha -R spec"
   },
   "engines": {
     "node": "~0.6.10"
@@ -21,6 +21,7 @@
   , "seq": "0.3.x"
   , "jshint": "0.5.x"
   , "less": "1.2.x"
+  , "colors": "0.6.0"
   },
   "devDependencies": {
     "mocha": "0.13.x"
