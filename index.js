@@ -7,6 +7,7 @@
 var cp = require('child_process')
   , EventEmitter = require('events').EventEmitter
   , fs = require('fs')
+  , path = require('path')
   , util = require('util')
   , colors = require('colors')
   , Seq = require('seq')
@@ -134,22 +135,41 @@ function Cli(cwd) {
   this.version = version;
   this.searchedDirs = [];
   this.cwd = cwd || process.cwd();
-  var path = this.findFile();
-  if (!path) {
-    this.fail([
-      "tax@%s - can't find tax.js"
-    , "looked in the following directories:\n%s"].join('\n')
-    , this.version
-    , this.searchedDirs.join('\n'));
-  }
+  this.fileName = ['tax.js'];
 }
 
 Cli.prototype = {
   start: function () {
-    var path = findFile();
+    var path = this.findFile();
+    if (!path) {
+      this.fail([
+        "tax@%s - can't find tax.js"
+      , "looked in the following directories:\n%s"].join('\n')
+      , this.version
+      , this.searchedDirs.join('\n'));
+    }
+    console.log(path);
   },
-  findFile: function () {
+  findFile: function (_path) {
+    var self = this;
+    _path = _path || this.cwd;
+    self.searchedDirs.push(_path);
 
+    var files = [];
+    try {
+      files = fs.readdirSync(_path);
+    } catch (e) {
+      return false;
+    }
+
+    var found = false;
+    files.forEach(function (f) {
+      if (!found && self.fileName.indexOf(f) !== -1) {
+        found = f;
+      }
+    });
+
+    return found ? path.resolve(_path, found) : findFile(path.resolve(_path, '../'));
   },
   getTasks: function () {
 
@@ -159,7 +179,7 @@ Cli.prototype = {
       process.chdir(dir);
       this.cwd = dir;
     } catch (e) {
-      this.fail("can't update cwd to %s".red, dir)
+      this.fail("can't chdir to %s".red, dir)
     }
   },
   fail: function () {
