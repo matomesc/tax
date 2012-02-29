@@ -91,6 +91,9 @@ function buildProto() {
             if (Array.isArray(result)) {
               result = [].concat.call([name], result);
             }
+            if (err) {
+              return cb(err);
+            }
             cp.exec(result.join(' '), cb);
           }
           fn.call({}, done);
