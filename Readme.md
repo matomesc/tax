@@ -12,25 +12,10 @@
 // every callback's this.args is a reference to an arguments object
 //
 task('build_less', 'compile less into ./static/less')
-  .mkdir('-p ./build')
-  .rm(function (done) {
-    //
-    // asynch stuff
-    //
-    
-    console.log(this.args) // task arguments object
-    
-    done(err, './build/*');
-  })
-  .lessc(function (){
-    // synch stuff
-    return './less/index.less';
-  })
-  //
-  // watches .watch(include, exclude) for changes and reinvokes the task
-  // include and exclude is either an Array or String
-  //
-  .watch('./less/*', ['./build/index.less']);
+  .mkdir('-p ./build/less')
+  .rm('./build/less/*')
+  .lessc('./less/index.less > ./build/css/index.css')
+  .watch('./less/*', './build/css/index.css');
 ```
 
 ## installation
@@ -58,15 +43,16 @@ if cb is synchronous, then it must return a string or an array of strings (which
 
 **_the rest of the api follows the same pattern_**
 
-###.rm()
 ###.cp()
+###.mv()
+###.rm()
 ###.lessc()
 ###.hint()
 ###.test()
-###.watch()
 
 **_and of course_**
 
 ###.async()
 ###.sync()
 ###.exec()
+###.watch()
