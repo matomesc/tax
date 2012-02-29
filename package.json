@@ -16,7 +16,14 @@
   "engines": {
     "node": "~0.6.10"
   },
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "findit": "0.1.x"
+  , "seq": "0.3.x"
+  , "jshint": "0.5.x"
+  , "less": "1.2.x"
+  },
+  "devDependencies": {
+    "mocha": "0.13.x"
+  },
   "optionalDependencies": {}
 }
