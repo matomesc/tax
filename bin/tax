@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+var tax = require('../');
+
+var cli = (new tax.Cli()).start()
