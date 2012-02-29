@@ -149,6 +149,7 @@ Cli.prototype = {
       , this.searchedDirs.join('\n'));
     }
     console.log(path);
+    console.log(this.searchedDirs);
   },
   findFile: function (_path) {
     var self = this;
@@ -169,7 +170,11 @@ Cli.prototype = {
       }
     });
 
-    return found ? path.resolve(_path, found) : findFile(path.resolve(_path, '../'));
+    if (_path === '/' && !found) {
+      return false;
+    }
+
+    return found ? path.resolve(_path, found) : this.findFile(path.resolve(_path, '../'));
   },
   getTasks: function () {
 
