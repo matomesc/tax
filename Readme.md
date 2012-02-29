@@ -1,6 +1,8 @@
 # tax
 
-```simple node.js build tool. tax does tasks```
+```
+simple node.js build tool. tax does tasks
+```
 
 ## example
 
@@ -20,17 +22,23 @@ task('build_less', 'compile less into ./static/less')
 
 ## installation
 
-`npm install -g tax`
+```
+npm install -g tax
+```
 
 ## usage
 
 You must first create a tax.js file like and define all of your tasks there. Then you can run your tasks:
 
-`$ tax build_less -foo bar`
+```
+$ tax build_less -foo bar
+```
 
 or list them
 
-`$ tax -l`
+```
+$ tax -l
+```
 
 ## config
 
