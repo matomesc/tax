@@ -20,7 +20,7 @@ task('build_less', 'compile less into ./static/less')
 
 ## installation
 
-`npm install -g blt`
+`npm install -g tax`
 
 ## usage
 
@@ -31,6 +31,11 @@ You must first create a tax.js file like and define all of your tasks there. The
 or list them
 
 `$ tax -l`
+
+## config
+
+you can set the global `config.jshint` to configure jshint
+(check [this](https://github.com/jshint/node-jshint/blob/master/example/config.json) out).
 
 ## api
 
