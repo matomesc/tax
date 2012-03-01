@@ -8,6 +8,7 @@ var cp = require('child_process')
   , EventEmitter = require('events').EventEmitter
   , fs = require('fs')
   , path = require('path')
+  , vm = require('vm')
   , util = require('util')
   , colors = require('colors')
   , Seq = require('seq')
@@ -50,7 +51,7 @@ function Task(name, description) {
 util.inherits(Task, EventEmitter);
 
 merge(Task.prototype, buildProto(), {
-  invoke: function (args) {
+  run: function (args) {
     var self = this;
     Seq(this.queue)
       .seqEach(function (subtask) {
@@ -79,12 +80,30 @@ merge(Task.prototype, buildProto(), {
   sync: function (fn) {
     this.addSubtask(fn, false);
   },
+  exec: function (cmd, opts, cb) {
+    var defaultOpts = { cwd: process.cwd() };
+
+    // check for no opts
+    if (typeof opts === 'function') {
+      cb = opts;
+      opts = defaultOpts;
+    } else {
+      opts = merge(defaultOpts, opts);
+    }
+
+    if (Array.isArray(cmd)) {
+      cmd = cmd.join(' ');
+    }
+
+    cp.exec(cmd, opts, cb || noop);
+  },
   watch: function (include, exclude) {
 
   },
   addSubtask: function (fn, async) {
     var subtask = new Subtask(fn, async);
     this.queue.push(subtask);
+    return subtask;
   },
 });
 
@@ -119,10 +138,10 @@ function buildProto() {
           cp.exec(result.join(' '), execOpts, cb);
         }
       }
-      this.addSubtask(wrapper, true);
+      self.queue.push(self.addSubtask(wrapper, true));
+      return self;
     };
   });
-
   return proto;
 }
 
@@ -146,6 +165,9 @@ function Runner() {
 }
 
 Runner.prototype = {
+  //
+  // add a new task to the runner and return it
+  //
   createTask: function (name, description) {
     this.tasks[name] = new Task(name, description);
     return this.tasks[name];
@@ -159,6 +181,9 @@ Runner.prototype = {
       return line;
     });
     console.log(lines.join('\n'));
+  },
+  run: function (name) {
+    this.tasks[name].run();
   }
 };
 
@@ -176,9 +201,9 @@ function Cli(cwd) {
 Cli.prototype = {
   start: function () {
     console.log("tax@%s", this.version)
-    var path = this.findFile();
+    var _path = this.findFile();
 
-    if (!path) {
+    if (!_path) {
       this.fail([
         "can't find tax.js"
       , "looked in the following directories:\n%s"].join('\n')
@@ -186,6 +211,9 @@ Cli.prototype = {
     }
 
     var runner = new Runner();
+    this.execFile(runner, _path);
+
+    console.log(util.inspect(runner, true, 20));
 
     // parse process.argv
     var argv = optimist
@@ -193,8 +221,8 @@ Cli.prototype = {
       .argv;
     var taskArgv = optimist.parse([].slice.call(process.argv, 3));
 
-    runner.createTask('hey', 'ho');
-    runner.createTask('yo', 'son');
+    // runner.createTask('hey', 'ho');
+    // runner.createTask('yo', 'son');
     // console.log(process.argv);
     // console.log('argv: %j', argv);
     // console.log('taskArgv: %j', taskArgv);
@@ -203,6 +231,11 @@ Cli.prototype = {
       return runner.listTasks();
     } else if (argv._.length > 0) {
       var taskName = argv._[0];
+      if (!runner.tasks[taskName]) {
+        fail('invalid task name %s', taskName);
+      } else {
+        runner.run(taskName);
+      }
       console.log('run %s', taskName);
     }
 
@@ -213,29 +246,30 @@ Cli.prototype = {
     var self = this;
     _path = _path || this.cwd;
     self.searchedDirs.push(_path);
-
     var files = [];
     try {
       files = fs.readdirSync(_path);
     } catch (e) {
       return false;
     }
-
     var found = false;
     files.forEach(function (f) {
       if (!found && self.fileName.indexOf(f) !== -1) {
         found = f;
       }
     });
-
     if (_path === '/' && !found) {
       return false;
     }
-
     return found ? path.resolve(_path, found) : this.findFile(path.resolve(_path, '../'));
   },
-  getTasks: function () {
-
+  execFile: function (runner, _path) {
+    global.task = function (name, description) {
+      return runner.createTask(name, description);
+    }
+    var context = vm.createContext(global);
+    var code = fs.readFileSync(_path, 'utf8');
+    vm.runInContext(code, context, _path);
   },
   updateCwd: function (dir) {
     try {
@@ -254,6 +288,8 @@ Cli.prototype = {
 //
 // utils
 //
+
+function noop() {}
 
 function merge() {
   var objs = Array.prototype.slice.call(arguments, 1);
