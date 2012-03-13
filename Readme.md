@@ -1,8 +1,6 @@
 # tax
 
-```
-simple node.js build tool. tax does tasks
-```
+> simple node.js build tool. tax does tasks
 
 ## example
 
