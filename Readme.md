@@ -38,11 +38,6 @@ or list them
 $ tax -l
 ```
 
-## config
-
-you can set the global `config.jshint` to configure jshint
-(check [this](https://github.com/jshint/node-jshint/blob/master/example/config.json) out).
-
 ## api
 
 ###.mkdir('./css')
