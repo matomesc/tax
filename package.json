@@ -9,6 +9,7 @@
     "type": "git",
     "url": "git://github.com/matomesc/tax.git"
   },
+  "bin": "./bin/tax",
   "main": "./index.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha -R spec"
