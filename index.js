@@ -6,8 +6,7 @@
  
 var version = exports.version = require('./package.json').version;
 
-
 exports.Subtask = require('./lib/subtask');
 exports.Task = require('./lib/task');
-exports.Runner = require('./lib/runner');
+exports.Suite = require('./lib/suite');
 exports.Cli = require('./lib/cli');
